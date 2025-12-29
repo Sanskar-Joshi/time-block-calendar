@@ -33,6 +33,8 @@
               class="current-time-indicator"
               style="display: none"
             ></div>
+
+            <div class="empty-message">Tap a slot to plan your day</div>
           </div>
         </div>
       </div>
@@ -65,7 +67,7 @@
           </div>
 
           <div class="form-group">
-            <label>Color Tag</label>
+            <span class="input-label">Color Tag</span>
             <div class="color-options">
               <input
                 type="radio"
@@ -73,6 +75,7 @@
                 value="blue"
                 id="c_blue"
                 checked
+                aria-label="Blue Color"
               />
               <label for="c_blue" class="color-circle blue"></label>
 
@@ -81,6 +84,7 @@
                 name="eventColor"
                 value="green"
                 id="c_green"
+                aria-label="Green Color"
               />
               <label for="c_green" class="color-circle green"></label>
 
@@ -89,6 +93,7 @@
                 name="eventColor"
                 value="purple"
                 id="c_purple"
+                aria-label="Purple Color"
               />
               <label for="c_purple" class="color-circle purple"></label>
 
@@ -97,15 +102,30 @@
                 name="eventColor"
                 value="orange"
                 id="c_orange"
+                aria-label="Orange Color"
               />
               <label for="c_orange" class="color-circle orange"></label>
 
-              <input type="radio" name="eventColor" value="red" id="c_red" />
+              <input
+                type="radio"
+                name="eventColor"
+                value="red"
+                id="c_red"
+                aria-label="Red Color"
+              />
               <label for="c_red" class="color-circle red"></label>
             </div>
           </div>
 
           <div class="modal-actions">
+            <button
+              type="button"
+              class="btn btn-danger"
+              id="deleteEventBtn"
+              style="display: none"
+            >
+              Delete
+            </button>
             <button type="button" class="btn btn-secondary" id="cancelBtn">
               Cancel
             </button>
