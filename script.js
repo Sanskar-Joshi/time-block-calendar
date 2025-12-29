@@ -13,7 +13,8 @@ function init() {
   renderEvents(); // Render saved events
 
   // Scroll to 8 AM initially
-  document.querySelector(".calendar-container").scrollTop = 120;
+  const container = document.querySelector(".calendar-container");
+  if (container) container.scrollTop = 120;
 
   setupEventListeners();
   updateCurrentTimeIndicator();
@@ -73,10 +74,23 @@ function setupEventListeners() {
   document
     .getElementById("cancelBtn")
     .addEventListener("click", closeEventModal);
+
   document.getElementById("eventForm").addEventListener("submit", saveEvent);
 
   document.getElementById("eventModal").addEventListener("click", (e) => {
     if (e.target.id === "eventModal") closeEventModal();
+  });
+
+  document.getElementById("deleteEventBtn").addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (editingEventId) {
+      if (confirm("Are you sure you want to delete this event?")) {
+        deleteEvent(editingEventId);
+        setTimeout(() => closeEventModal(), 50);
+      }
+    }
   });
 }
 
@@ -86,20 +100,28 @@ function openEventModal(hour = null, event = null) {
   const eventTitle = document.getElementById("eventTitle");
   const eventStart = document.getElementById("eventStart");
   const eventEnd = document.getElementById("eventEnd");
+  const deleteBtn = document.getElementById("deleteEventBtn");
 
   if (event) {
     modalTitle.textContent = "Edit Event";
     eventTitle.value = event.title;
     eventStart.value = event.startTime;
     eventEnd.value = event.endTime;
-    // Set color radio button
-    document.querySelector(
+
+    // Show Delete Button
+    deleteBtn.style.display = "block";
+
+    const colorRadio = document.querySelector(
       `input[name="eventColor"][value="${event.color}"]`
-    ).checked = true;
+    );
+
+    if (colorRadio) colorRadio.checked = true;
+
     editingEventId = event.id;
   } else {
     modalTitle.textContent = "Add New Event";
     eventTitle.value = "";
+    deleteBtn.style.display = "none";
 
     // Default time logic
     const startH = hour !== null ? hour : 9;
@@ -138,7 +160,7 @@ function saveEvent(e) {
     id: editingEventId || Date.now().toString(),
     title,
     startTime,
-    endTime, // Fixed typo
+    endTime,
     color,
   };
 
@@ -151,7 +173,6 @@ function saveEvent(e) {
 
   // Save to LocalStorage
   localStorage.setItem("calendarEvents", JSON.stringify(events));
-
   renderEvents();
   closeEventModal();
 }
@@ -163,7 +184,6 @@ function renderEvents() {
     const eventElement = document.createElement("div");
     eventElement.className = `event event-${event.color}`;
 
-    // Convert time to 12h format for display
     const formatTimeStr = (t) => {
       let [h, m] = t.split(":");
       let ampm = h >= 12 ? "PM" : "AM";
@@ -171,22 +191,18 @@ function renderEvents() {
       return `${h}:${m} ${ampm}`;
     };
 
-    // Add time range text
-    eventElement.innerHTML = `
-      <span class="event-time">${formatTimeStr(
-        event.startTime
-      )} - ${formatTimeStr(event.endTime)}</span>
-      ${event.title}
-    `;
+    eventElement.innerHTML = `<span class="event-time">${formatTimeStr(
+      event.startTime
+    )} - ${formatTimeStr(event.endTime)}</span><span class="event-title">${
+      event.title
+    }</span>`;
 
-    // Logic: 1px = 1 minute
-    // 6 AM is 0px
     const startH = parseInt(event.startTime.split(":")[0]);
     const startM = parseInt(event.startTime.split(":")[1]);
     const endH = parseInt(event.endTime.split(":")[0]);
     const endM = parseInt(event.endTime.split(":")[1]);
 
-    if (startH < 6 || startH >= 23) return; // Outside view
+    if (startH < 6 || startH >= 23) return;
 
     const startMinutesFrom6AM = (startH - 6) * 60 + startM;
     const durationMinutes = endH * 60 + endM - (startH * 60 + startM);
@@ -197,11 +213,6 @@ function renderEvents() {
     eventElement.addEventListener("click", (e) => {
       e.stopPropagation();
       openEventModal(null, event);
-    });
-
-    eventElement.addEventListener("dblclick", (e) => {
-      e.stopPropagation();
-      if (confirm("Delete this event?")) deleteEvent(event.id);
     });
 
     document.getElementById("calendarBody").appendChild(eventElement);
@@ -247,6 +258,13 @@ function updateCurrentTimeIndicator() {
   } else {
     indicator.style.display = "none";
   }
+
+  document.querySelectorAll(".time-slot").forEach((slot) => {
+    slot.classList.remove("current-hour");
+    if (parseInt(slot.dataset.hour) === h) {
+      slot.classList.add("current-hour");
+    }
+  });
 }
 
 init();
