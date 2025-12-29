@@ -1,4 +1,4 @@
-# 📅 TimeBlock Calendar
+# 📅 Productivity Scheduler
 
 A smart daily planner app designed as a full-screen productivity dashboard. It helps users organize their day efficiently with a visual time-block interface.
 
